@@ -1,0 +1,70 @@
+const express = require('express');
+const app = express();
+const port = 3000;
+
+app.use(express.json());
+
+// In-memory data storage
+let students = [
+  { id: 1, name: "Alice", course: "Node.js" },
+  { id: 2, name: "Bob", course: "React" }
+];
+
+// GET all students
+app.get('/students', (req, res) => {
+  res.json(students);
+});
+
+// GET student by ID
+app.get('/students/:id', (req, res) => {
+  const id = parseInt(req.params.id);
+  const student = students.find(s => s.id === id);
+  if (student) {
+    res.json(student);
+  } else {
+    res.status(404).json({ message: "Student not found" });
+  }
+});
+
+// POST add new student
+app.post('/students', (req, res) => {
+  const { name, course } = req.body;
+  const newStudent = {
+    id: students.length ? students[students.length - 1].id + 1 : 1,
+    name,
+    course
+  };
+  students.push(newStudent);
+  res.status(201).json(newStudent);
+});
+
+// PUT update student by ID
+app.put('/students/:id', (req, res) => {
+  const id = parseInt(req.params.id);
+  const { name, course } = req.body;
+  const student = students.find(s => s.id === id);
+
+  if (student) {
+    student.name = name || student.name;
+    student.course = course || student.course;
+    res.json(student);
+  } else {
+    res.status(404).json({ message: "Student not found" });
+  }
+});
+
+// DELETE student by ID
+app.delete('/students/:id', (req, res) => {
+  const id = parseInt(req.params.id);
+  const index = students.findIndex(s => s.id === id);
+  if (index !== -1) {
+    students.splice(index, 1);
+    res.json({ message: "Student deleted" });
+  } else {
+    res.status(404).json({ message: "Student not found" });
+  }
+});
+
+app.listen(port, () => {
+  console.log(`Server is running at http://localhost:${port}`);
+});
